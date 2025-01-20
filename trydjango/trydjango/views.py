@@ -6,13 +6,18 @@ from django.template.loader import render_to_string, get_template
 import random
 
 
-def home_view(request):
+def home_view(request, *args, **kwargs):
+    print(args, kwargs)
     name="Raiyan"
     name2 ="Farooqui"
     number= random.randint(1,4)
     articel_obj = Article.objects.get(id=number)
+    artilce_queryset = Article.objects.all()
+    
+
     
     context={
+        "object_list":artilce_queryset,
         "object":articel_obj,
         "title":articel_obj.title,
         "id":articel_obj.id,
