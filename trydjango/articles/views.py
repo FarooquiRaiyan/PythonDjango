@@ -5,7 +5,7 @@ from .models import Article
 def article_detail_view(request, id=None):
     article_obj=None
     if id is not None:
-        obj = Article.objects.get(id=id)
+        article_obj = Article.objects.get(id=id)
     context ={
         "object":article_obj,
     }
