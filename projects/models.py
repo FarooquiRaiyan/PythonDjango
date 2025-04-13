@@ -18,7 +18,7 @@ PRIORITY_CHOICES = [
 ]
 
 class Project(models.Model):
-    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='projects')
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='projects_projects' )
     id= models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name= models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)

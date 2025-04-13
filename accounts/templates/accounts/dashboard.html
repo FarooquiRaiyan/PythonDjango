@@ -209,47 +209,26 @@
             <table class="table m-0">
               <thead>
               <tr>
-                <th>Order ID</th>
-                <th>Item</th>
+                <th>Name</th>
+                <th>Start Date</th>
+                <th>Due Date</th>
+                <th>Dues In</th>
                 <th>Status</th>
-                <th>Popularity</th>
+                <th>Priority</th>
               </tr>
               </thead>
               <tbody>
+                {% for projects in latest_tasks %}
               <tr>
-                <td><a href="./pages/examples/task-detail.html">OR9842</a></td>
-                <td>Call of Duty IV</td>
-                <td><span class="badge badge-success">Shipped</span></td>
-                <td>
-                  <div class="sparkbar" data-color="#00a65a" data-height="20">90,80,90,-70,61,-83,63</div>
-                </td>
+                <td><a href="./pages/examples/project-detail.html">{{projects.name}}</a></td>
+                <td>{{projects.start_date}}</td>
+                <td>{{projects.due_date}}</td>
+                <td>{{projects.days_until_due}}</td>
+                <td>{{projects.status}}</td>
+                
+                <td><span class="badge badge-{{projects.priority_color}}">{{projects.priority}}</span></td>
               </tr>
-              <tr>
-                <td><a href="./pages/examples/task-detail.html">OR1848</a></td>
-                <td>Samsung Smart TV</td>
-                <td><span class="badge badge-warning">Pending</span></td>
-                <td>
-                  <div class="sparkbar" data-color="#f39c12" data-height="20">90,80,-90,70,61,-83,68</div>
-                </td>
-              </tr>
-              <tr>
-                <td><a href="./pages/examples/task-detail.html">OR7429</a></td>
-                <td>iPhone 6 Plus</td>
-                <td><span class="badge badge-danger">Delivered</span></td>
-                <td>
-                  <div class="sparkbar" data-color="#f56954" data-height="20">90,-80,90,70,-61,83,63</div>
-                </td>
-              </tr>
-              <tr>
-                <td><a href="./pages/examples/task-detail.html">OR7429</a></td>
-                <td>Samsung Smart TV</td>
-                <td><span class="badge badge-info">Processing</span></td>
-                <td>
-                  <div class="sparkbar" data-color="#00c0ef" data-height="20">90,80,-90,70,-61,83,63</div>
-                </td>
-              </tr>               
-           
-            
+              {% endfor %}
               </tbody>
             </table>
           </div>
@@ -258,7 +237,7 @@
         <!-- /.card-body -->
         <div class="card-footer clearfix">
          
-          <a href="./pages/examples/tasks.html" class="btn btn-sm btn-secondary float-right">View All Tasks</a>
+          <a href="./pages/examples/projects.html" class="btn btn-sm btn-secondary float-right">View All Projects</a>
         </div>
         <!-- /.card-footer -->
       </div>
@@ -271,40 +250,19 @@
                 <strong>Goal Completion</strong>
               </p>
 
+
+              {% for tasks in latest_tasks %}
               <div class="progress-group">
-                Add Products to Cart
-                <span class="float-right"><b>160</b>/200</span>
+                {{tasks.name}}
+                <span class="float-right"><b>{{ tasks.progress }}</b>/100</span>
                 <div class="progress progress-sm">
-                  <div class="progress-bar bg-primary" style="width: 80%"></div>
+                  <div class="progress-bar bg-{{tasks.status_color}}" style="width: {{ tasks.progress}}%"></div>
                 </div>
               </div>
+              {% endfor %}
               <!-- /.progress-group -->
 
-              <div class="progress-group">
-                Complete Purchase
-                <span class="float-right"><b>310</b>/400</span>
-                <div class="progress progress-sm">
-                  <div class="progress-bar bg-danger" style="width: 75%"></div>
-                </div>
-              </div>
-
-              <!-- /.progress-group -->
-              <div class="progress-group">
-                <span class="progress-text">Visit Premium Page</span>
-                <span class="float-right"><b>480</b>/800</span>
-                <div class="progress progress-sm">
-                  <div class="progress-bar bg-success" style="width: 60%"></div>
-                </div>
-              </div>
-
-              <!-- /.progress-group -->
-              <div class="progress-group">
-                Send Inquiries
-                <span class="float-right"><b>250</b>/500</span>
-                <div class="progress progress-sm">
-                  <div class="progress-bar bg-warning" style="width: 50%"></div>
-                </div>
-              </div>
+              
               <!-- /.progress-group -->
             </div>
             <!-- /.col -->
@@ -317,6 +275,7 @@
     </div>
     <!-- /.col -->
   </div>
+
   <!-- /.row -->
 
   <!-- Main row -->
@@ -346,46 +305,17 @@
             <!-- /.card-header -->
             <div class="card-body p-0">
               <ul class="users-list clearfix">
+                {% for member in latest_members %}
                 <li>
-                  <img src="{% static 'dist/img/user1-128x128.jpg' %}" alt="User Image">
-                  <a class="users-list-name" href="#">Alexander Pierce</a>
-                  <span class="users-list-date">Today</span>
+                  <img src="{{ member.profile_picture_url }}" alt="User Image">
+                  <a class="users-list-name" href="#">{{member.full_name}}</a>
+                  <span class="users-list-date">{{member.date_joined}}</span>
+                  
                 </li>
-                <li>
-                  <img src="{% static 'dist/img/user8-128x128.jpg' %}" alt="User Image">
-                  <a class="users-list-name" href="#">Norman</a>
-                  <span class="users-list-date">Yesterday</span>
-                </li>
-                <li>
-                  <img src="{% static 'dist/img/user7-128x128.jpg' %}" alt="User Image">
-                  <a class="users-list-name" href="#">Jane</a>
-                  <span class="users-list-date">12 Jan</span>
-                </li>
-                <li>
-                  <img src="{% static 'dist/img/user6-128x128.jpg' %}" alt="User Image">
-                  <a class="users-list-name" href="#">John</a>
-                  <span class="users-list-date">12 Jan</span>
-                </li>
-                <li>
-                  <img src="{% static 'dist/img/user2-160x160.jpg' %}" alt="User Image">
-                  <a class="users-list-name" href="#">Alexander</a>
-                  <span class="users-list-date">13 Jan</span>
-                </li>
-                <li>
-                  <img src="{% static 'dist/img/user5-128x128.jpg' %}" alt="User Image">
-                  <a class="users-list-name" href="#">Sarah</a>
-                  <span class="users-list-date">14 Jan</span>
-                </li>
-                <li>
-                  <img src="{% static 'dist/img/user4-128x128.jpg' %}" alt="User Image">
-                  <a class="users-list-name" href="#">Nora</a>
-                  <span class="users-list-date">15 Jan</span>
-                </li>
-                <li>
-                  <img src="{% static 'dist/img/user3-128x128.jpg' %}" alt="User Image">
-                  <a class="users-list-name" href="#">Nadia</a>
-                  <span class="users-list-date">15 Jan</span>
-                </li>
+                {% endfor %}
+
+         
+                
               </ul>
               <!-- /.users-list -->
             </div>
@@ -406,7 +336,7 @@
               <h3 class="card-title">Notifications</h3>
 
               <div class="card-tools">
-                <span title="3 New Messages" class="badge badge-warning">3</span>
+                <span title="3 New Messages" class="badge badge-warning">{{notification_count}}</span>
                 <button type="button" class="btn btn-tool" data-card-widget="collapse">
                   <i class="fas fa-minus"></i>
                 </button>
@@ -421,32 +351,23 @@
               <!-- Conversations are loaded here -->
               <div class="direct-chat-messages">
 
+                {% for notification in latest_notifications %}
                 <!-- notifications -->
                 <div class="direct-chat-msg">
                   <div class="direct-chat-infos clearfix">                        
-                    <span class="direct-chat-timestamp float-right">23 Jan 2:00 pm</span>
+                    <span class="direct-chat-timestamp float-right">{{notification.notification_time_formatted}}</span>
                   </div>
                   <!-- /.notification-infos -->
-                  <img class="direct-chat-img" src="{% static './dist/img/AdminLTELogo.png' %}" alt="message user image">
+                  <img class="direct-chat-img" src="{{ notification.actor.profile.profile_picture_url}}" alt="message user image">
                   <!-- /.notification-img -->
                   <div class="direct-chat-text">
-                    Is this template really for free? That's unbelievable!
+                    {{notification.verb}}
                   </div>
                 </div> 
+                {% endfor %}
                    <!--end of first notification  -->
 
-                   <!-- notifications -->
-                <div class="direct-chat-msg">
-                  <div class="direct-chat-infos clearfix">                        
-                    <span class="direct-chat-timestamp float-right">23 Jan 2:00 pm</span>
-                  </div>
-                  <!-- /.notification-infos -->
-                  <img class="direct-chat-img" src="./dist/img/AdminLTELogo.png" alt="message user image">
-                  <!-- /.notification-img -->
-                  <div class="direct-chat-text">
-                    Is this template really for free? That's unbelievable!
-                  </div>
-                </div> 
+               
                    <!--end of second notification  -->
 
               </div>
