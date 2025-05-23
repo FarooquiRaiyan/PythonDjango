@@ -13,6 +13,10 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 
 # part two 33:28
+#part three 1 hour :31 minute   
+#part 4 , 43:40
+#part 5 ,36 mins
+
 
 from pathlib import Path
 import os
@@ -31,8 +35,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
 # Application definition
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -41,10 +45,20 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    
+    #third party apps
+    'tempus_dominus',
+    'crispy_forms',
+    'crispy_bootstrap5',
+    'django_celery_beat',
+    'phonenumber_field',
+    
     'accounts',
     'projects',
     'tasks',
     'notifications',
+    'teams',
+    'comments'
 ]
 
 MIDDLEWARE = [
@@ -55,6 +69,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    
+    'django.contrib.auth.middleware.LoginRequiredMiddleware',
 ]
 
 ROOT_URLCONF = 'swifthub.urls'
@@ -136,3 +152,38 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+#CRISPY FORM TEMPLATE
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+CRISPY_TEMPLATE_PACK = "bootstrap5"
+
+#celery configurations
+CELERY_BROKER_URL = "redis://localhost:6379"
+CELERY_RESULT_BACKEND = "redis://localhost:6379"
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_TIMEZONE ='UTC'
+
+#django celery beat scheduler
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers.DatabaseScheduler'
+
+#custom django auth settings
+LOGIN_URL = "login"
+LOGOUT_URL = "logout"
+
+LOGIN_REDIRECT_URL ='accounts:dashboard'
+LOGOUT_REDIRECT_URL = LOGIN_URL
+
+
+
+# Example using Gmail SMTP
+
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_USE_TLS = True
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'raiyan6615@gmail.com'
+EMAIL_HOST_PASSWORD = 'lnvyiaosfovcnwzl'
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER

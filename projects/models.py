@@ -1,34 +1,62 @@
 from django.db import models
 import uuid 
 from django.utils import timezone
+from datetime import timedelta, datetime
 from django.contrib.auth.models import User
-
+from teams.models import Team
 # Create your models here.
 
-STATUS_CHOICES = [
-    ('To Do', 'To Do'),
-    ('In Progress', 'In Progress'),
-    ('Completed', 'Completed'),
-]
+from .utils import STATUS_CHOICES, PRIORITY_CHOICES
 
-PRIORITY_CHOICES = [
-    ('Low', 'Low'),
-    ('Medium', 'Medium'),
-    ('High', 'High'),
-]
 
+
+class ProjectQueryset(models.QuerySet):
+    def active(self):
+        return self.filter(active=True)
+    
+    def upcoming(self):
+        return self.filter(due_date__gte=timezone.now())
+    
+    def due_in_two_days_or__less(self):
+        today = timezone.now().date()
+        two_days_from_today = today + timedelta(days=2)
+        return self.active().upcoming().filter(due_date__lte = two_days_from_today)
+    
+
+class ProjectManager(models.Manager):
+    def get_queryset(self):
+        return ProjectQueryset(self.model, using=self._db)
+    
+    def all(self):
+        return self.get_queryset().active().upcoming()
+    
+    def due_in_two_days_or__less(self):
+        return self.get_queryset().active().upcoming().due_in_two_days_or__less()
+    
+    
+    
 class Project(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='projects_projects' )
     id= models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    team = models.ForeignKey(Team, related_name='projects', on_delete=models.CASCADE)
     name= models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
+    client_company = models.CharField(max_length=100, blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="To Do")
     priority = models.CharField(max_length=20, choices=PRIORITY_CHOICES, default="Medium")
-    active = models.BooleanField(default=True)
+   
+    #budget details
+    total_amount = models.DecimalField(max_digits=12, decimal_places=2,blank=True, null=True)
+    amount_spent = models.DecimalField(max_digits=12, decimal_places=2,default= 0.00,blank=True, null=True)
+    estimated_duration = models.IntegerField(blank=True, null=True,help_text="Estimated Duration in days")
     start_date = models.DateField()
     due_date = models.DateField()
+    active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    
+
+    objects = ProjectManager()
     
     def __str__(self):
         return self.name
@@ -74,4 +102,24 @@ class Project(models.Model):
         else:
             color = "danger"
         return color
-            
+
+
+
+
+#project _file_location
+def project_attachment_path_location(instance, filename):
+    #get todays date YYYY-MM-DD
+    today_date=datetime.now().strftime('%Y-%m-%d')
+    #return the upload path
+    return "attachments/%s/%s/%s" % (instance.project.name, today_date,filename)
+    
+
+
+class Attachment(models.Model):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name= 'attachments')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name= 'attachments')
+    file = models.FileField(upload_to=project_attachment_path_location)
+    uploaded_at =models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"Attachment by {self.user.username} on {self.project.name}"

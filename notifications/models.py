@@ -5,15 +5,16 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 
 # Create your mode(ls here.
 class NotificationsManager(models.Manager):
-    def for_user(self,user):
-        return self.filter(receipient=user)
+    # def for_user(self,user):
+    #     return self.filter(receipient=user)
     
     def unread(self,user):
-        return self.for_user(user).filter(read=False)
+        return self.filter(read=False).exclude(actor=user)
     
     
-    def read(self,user):
-        return self.for_user(user).filter(read=True)
+    def read(self):
+        return self.filter(read=True).exclude(actor=user)
+    
 
 
 
@@ -25,7 +26,7 @@ class Notification(models.Model):
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.CharField(max_length=255)
     content_object = GenericForeignKey('content_type','object_id')
-    created_at = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
     read=models.BooleanField(default=False)
     
     objects=NotificationsManager()
@@ -40,6 +41,6 @@ class Notification(models.Model):
     def notification_time_formatted(self):
         return self.created_at.strftime("%d %b %I:%M %p")
     
-    
-    
-    
+    def mark_as_read(self):
+        self.read = True
+        self.save()

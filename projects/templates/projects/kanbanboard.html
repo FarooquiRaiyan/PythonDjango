@@ -1,0 +1,315 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+  {{ title }} | {{ block.super }}
+{% endblock title %}
+
+{% block page_css %}
+  <!-- Ekko Lightbox -->
+  <link rel="stylesheet" href="{% static "plugins/ekko-lightbox/ekko-lightbox.css" %}">
+  <style>
+    .task-card {
+        cursor: grab;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .form-group input {
+      width: 100%;
+    }
+    #backlog h3 {
+      margin-right: 10px;
+    }
+    .task-list {
+      max-height: 400px;
+      overflow-y: auto;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid h-100">
+  <!-- Backlog Column -->
+  <div class="card card-row card-secondary board-column" id="backlog">
+    <div class="card-header">
+      <h3 class="card-title">Backlog</h3>
+      <!-- Task Creation Form -->
+     <form id="create-task-form" data-project-id="{{ project.id }}" method="POST" action="{% url 'tasks:create_task_ajax' %}">
+  {% csrf_token %}
+  <div class="form-group">
+    <!-- Task Name -->
+    <input type="text" id="task-name" name="name" class="form-control" placeholder="Task Name" required>
+    
+    <!-- Notification Email (optional) -->
+    <input type="email" id="taskEmailInput" name="email" placeholder="Notification Email (optional)">
+    
+    <!-- Start Date -->
+    <input type="date" id="start-date" name="start_date" class="form-control" placeholder="Start Date">
+    
+    <!-- Due Date -->
+    <input type="date" id="due-date" name="due_date" class="form-control" placeholder="Due Date">
+    
+    <!-- Project ID -->
+    <input type="hidden" id="projectIdInput" name="project_id" value="{{ project.id }}">
+    
+    <!-- Submit Button -->
+    <button type="submit" class="btn btn-primary mt-2">Add Task</button>
+  </div>
+</form>
+
+
+    </div>
+    <div class="card-body task-list">
+      {% for task in backlog_tasks %}
+      <div class="card card-secondary card-outline task-card" data-task-id="{{ task.id }}">
+        <div class="card-header">
+          <h5 class="card-title">{{ task.name }}</h5><br>
+          <p>Start Date : {{ task.start_date }}  <br> | Due Date: {{ task.due_date }}</p>
+          <div class="card-tools">
+            <a href="#" class="btn btn-tool btn-link task-counter"></a>
+            <a href="#" class="btn btn-tool"><i class="fas fa-pen"></i></a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- To Do Column -->
+  <div class="card card-row card-primary board-column" id="to-do">
+    <div class="card-header">
+      <h3 class="card-title">To Do</h3>
+    </div>
+    <div class="card-body task-list">
+      {% for task in todo_tasks %}
+      <div class="card card-primary card-outline task-card" data-task-id="{{ task.id }}">
+        <div class="card-header">
+          <h5 class="card-title">{{ task.name }}</h5>
+          <p>Start: {{ task.start_date }} | Due: {{ task.due_date }}</p>
+          <div class="card-tools">
+            <a href="#" class="btn btn-tool btn-link">#{{ forloop.counter }}</a>
+            <a href="#" class="btn btn-tool"><i class="fas fa-pen"></i></a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- In Progress Column -->
+  <div class="card card-row card-default board-column" id="in-progress">
+    <div class="card-header bg-info">
+      <h3 class="card-title">In Progress</h3>
+    </div>
+    <div class="card-body task-list">
+      {% for task in in_progress_tasks %}
+      <div class="card card-primary card-outline task-card" data-task-id="{{ task.id }}">
+        <div class="card-header">
+          <h5 class="card-title">{{ task.name }}</h5>
+          <p>Start: {{ task.start_date }} | Due: {{ task.due_date }}</p>
+          <div class="card-tools">
+            <a href="#" class="btn btn-tool btn-link">#{{ forloop.counter }}</a>
+            <a href="#" class="btn btn-tool"><i class="fas fa-pen"></i></a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Completed Column -->
+  <div class="card card-row card-success board-column" id="completed">
+    <div class="card-header">
+      <h3 class="card-title">Completed</h3>
+    </div>
+    <div class="card-body task-list">
+      {% for task in completed_tasks %}
+      <div class="card card-success card-outline task-card" data-task-id="{{ task.id }}">
+        <div class="card-header">
+          <h5 class="card-title">{{ task.name }}</h5>
+          <p>Start: {{ task.start_date }} | Due: {{ task.due_date }}</p>
+          <div class="card-tools">
+            <a href="#" class="btn btn-tool btn-link">#{{ forloop.counter }}</a>
+            <a href="#" class="btn btn-tool"><i class="fas fa-pen"></i></a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Drag and Drop Setup
+  function setupDraggable(card) {
+    card.draggable = true;
+    card.addEventListener('dragstart', (e) => {
+      e.dataTransfer.setData('text/plain', card.dataset.taskId);
+    });
+  }
+
+  document.querySelectorAll('.task-card').forEach(setupDraggable);
+
+  document.querySelectorAll('.board-column').forEach(column => {
+    column.addEventListener('dragover', e => e.preventDefault());
+
+    column.addEventListener('drop', e => {
+      e.preventDefault();
+      const taskId = e.dataTransfer.getData('text/plain');
+      const taskCard = document.querySelector([data-task-id="${taskId}"]);
+
+      const newStatus = column.id.replace('-', ' ');
+      column.querySelector('.task-list').prepend(taskCard);
+
+      taskCard.classList.remove('card-primary', 'card-secondary', 'card-light', 'card-success');
+      if (column.id === 'backlog') taskCard.classList.add('card-secondary');
+      else if (column.id === 'to-do') taskCard.classList.add('card-primary');
+      else if (column.id === 'in-progress') taskCard.classList.add('card-primary');
+      else if (column.id === 'completed') taskCard.classList.add('card-success');
+
+      updateTaskStatus(taskId, newStatus);
+    });
+  });
+
+  function updateTaskStatus(taskId, newStatus) {
+    fetch(/tasks/update-task-status-ajax/${taskId}/, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': '{{ csrf_token }}',
+      },
+      body: JSON.stringify({ status: newStatus }),
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (!data.success) console.error('Error updating task status');
+    });
+  }
+  document.getElementById("create-task-form").addEventListener("submit", function(e) {
+    e.preventDefault(); // Prevent default form submission
+
+    const form = e.target;
+    const formData = new FormData(form);
+
+    fetch(form.action, {
+        method: "POST",
+        headers: {
+            "X-Requested-With": "XMLHttpRequest",
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert("Task created successfully! Task ID: " + data.task_id);
+            // Optionally clear the form or update UI
+            form.reset();
+        } else {
+            alert("Task creation failed.");
+        }
+    })
+    .catch(error => {
+        console.error("Error:", error);
+    });
+});
+
+
+  document.getElementById("createTaskForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const name = document.getElementById("taskNameInput").value;
+    const email = document.getElementById("taskEmailInput").value;
+    const projectId = document.getElementById("projectIdInput").value;
+
+    const formData = new FormData();
+    formData.append("name", name);
+    formData.append("email", email);
+    formData.append("project_id", projectId);
+
+    fetch("{% url 'tasks:create_task_ajax'   %}", {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
+        },
+        body: formData,
+    })
+    .then((response) => response.json())
+    .then((data) => {
+        if (data.success) {
+            alert("Task created successfully!");
+            window.location.reload();  // or dynamically insert the task into the board
+        } else {
+            alert("Error: " + data.error);
+        }
+    });
+});
+
+
+  const taskForm = document.getElementById('create-task-form');
+  const taskNameInput = document.getElementById('task-name');
+  const startDateInput = document.getElementById('start-date').value;
+  const dueDateInput = document.getElementById('due-date').value;
+  const projectId = taskForm?.getAttribute('data-project-id');
+
+  if (taskForm && taskNameInput && projectId && startDateInput && dueDateInput) {
+    taskForm.addEventListener('submit', function (event) {
+      event.preventDefault();
+      const taskName = taskNameInput.value.trim();
+      const startDate = startDateInput.value;
+      const dueDate = dueDateInput.value;
+
+      if (!taskName) return;
+
+      const formData = new FormData(taskForm);
+      formData.append('name', taskName);
+      formData.append('project_id', projectId);
+      formData.append('start_date', startDate);
+      formData.append('due_date', dueDate);
+
+      fetch(taskForm.action, {
+        method: taskForm.method,
+        body: formData,
+        headers: {
+          'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          taskNameInput.value = '';
+          startDateInput.value = '';
+          dueDateInput.value = '';
+
+          const newTaskCard = document.createElement('div');
+          newTaskCard.classList.add('card', 'card-secondary', 'card-outline', 'task-card');
+          newTaskCard.setAttribute('data-task-id', data.task_id);
+          newTaskCard.innerHTML = 
+            <div class="card-header">
+              <h5 class="card-title">${taskName}</h5>
+              <p>Start: ${startDate} | Due: ${dueDate}</p>
+              <div class="card-tools">
+                <a href="#" class="btn btn-tool btn-link task-counter"></a>
+                <a href="#" class="btn btn-tool"><i class="fas fa-pen"></i></a>
+              </div>
+            </div>
+          ;
+
+          document.querySelector('#backlog .task-list').prepend(newTaskCard);
+          setupDraggable(newTaskCard);
+        } else {
+          console.error('Error creating task:', data.error);
+        }
+      })
+      .catch(err => console.error('Error creating task:', err));
+    });
+  }
+});
+</script>
+{% endblock %}

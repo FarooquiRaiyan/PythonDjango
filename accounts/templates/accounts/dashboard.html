@@ -1,5 +1,6 @@
 
 {% extends "base.html" %} 
+{% block title %}{{title}} | {{block.super}} {% endblock %}
 {% load static %}
 {% block content %}
 
@@ -8,13 +9,13 @@
   <div class="row">
     <div class="col-12 col-sm-6 col-md-3">
       <div class="info-box">
-        <span class="info-box-icon bg-info elevation-1"><i class="fas fa-cog"></i></span>
+        <span class="info-box-icon bg-info elevation-1"><i class="fas fa-copy"></i></span>
 
         <div class="info-box-content">
-          <span class="info-box-text">CPU Traffic</span>
+          <span class="info-box-text">Projects</span>
           <span class="info-box-number">
-            10
-            <small>%</small>
+            {{latest_project_count}}
+            <!-- <small>%</small> -->
           </span>
         </div>
         <!-- /.info-box-content -->
@@ -24,11 +25,11 @@
     <!-- /.col -->
     <div class="col-12 col-sm-6 col-md-3">
       <div class="info-box mb-3">
-        <span class="info-box-icon bg-danger elevation-1"><i class="fas fa-thumbs-up"></i></span>
+        <span class="info-box-icon bg-danger elevation-1"><i class="fas fa-tasks"></i></span>
 
         <div class="info-box-content">
-          <span class="info-box-text">Likes</span>
-          <span class="info-box-number">41,410</span>
+          <span class="info-box-text">Tasks</span>
+          <span class="info-box-number">{{latest_tasks_count}}</span>
         </div>
         <!-- /.info-box-content -->
       </div>
@@ -41,11 +42,11 @@
 
     <div class="col-12 col-sm-6 col-md-3">
       <div class="info-box mb-3">
-        <span class="info-box-icon bg-success elevation-1"><i class="fas fa-shopping-cart"></i></span>
+        <span class="info-box-icon bg-success elevation-1"><i class="fas fa-users"></i></span>
 
         <div class="info-box-content">
-          <span class="info-box-text">Sales</span>
-          <span class="info-box-number">760</span>
+          <span class="info-box-text">Teams</span>
+          <span class="info-box-number">{{teams_count}}</span>
         </div>
         <!-- /.info-box-content -->
       </div>
@@ -54,11 +55,11 @@
     <!-- /.col -->
     <div class="col-12 col-sm-6 col-md-3">
       <div class="info-box mb-3">
-        <span class="info-box-icon bg-warning elevation-1"><i class="fas fa-users"></i></span>
+        <span class="info-box-icon bg-warning elevation-1"><i class="fas fa-user-plus"></i></span>
 
         <div class="info-box-content">
-          <span class="info-box-text">New Members</span>
-          <span class="info-box-number">2,000</span>
+          <span class="info-box-text">Members</span>
+          <span class="info-box-number">{{latest_members_count}}</span>
         </div>
         <!-- /.info-box-content -->
       </div>
@@ -105,7 +106,7 @@
               <thead>
               <tr>
                 <th>Name</th>
-                <th>Start Date</th>
+                <th>Team</th>
                 <th>Due Date</th>
                 <th>Dues In</th>
                 <th>Status</th>
@@ -115,8 +116,8 @@
               <tbody>
                 {% for projects in latest_project %}
               <tr>
-                <td><a href="./pages/examples/project-detail.html">{{projects.name}}</a></td>
-                <td>{{projects.start_date}}</td>
+                <td><a href="{% url "projects:project-detail" projects.id %}">{{projects.name}}</a></td>
+                <td>{{projects.team.name}}</td>
                 <td>{{projects.due_date}}</td>
                 <td>{{projects.days_until_due}}</td>
                 <td>{{projects.status}}</td>
@@ -132,7 +133,7 @@
         <!-- /.card-body -->
         <div class="card-footer clearfix">
          
-          <a href="./pages/examples/projects.html" class="btn btn-sm btn-secondary float-right">View All Projects</a>
+          <a href="{% url "projects:list" %}" class="btn btn-sm btn-secondary float-right">View All Projects</a>
         </div>
         <!-- /.card-footer -->
       </div>
@@ -178,7 +179,7 @@
     <div class="col-md-12">
       <div class="card">
         <div class="card-header">
-          <h5 class="card-title">Tasks</h5>
+          <h5 class="card-title">Projects</h5>
 
           <div class="card-tools">
             <button type="button" class="btn btn-tool" data-card-widget="collapse">
@@ -199,7 +200,7 @@
                 <!-- TABLE: LATEST Projects -->
       <div class="card">
         <div class="card-header border-transparent">
-          <h3 class="card-title">Latest Tasks</h3>
+          <h3 class="card-title">Projects near due date</h3>
 
       
         </div>
@@ -210,7 +211,7 @@
               <thead>
               <tr>
                 <th>Name</th>
-                <th>Start Date</th>
+                <th>Team</th>
                 <th>Due Date</th>
                 <th>Dues In</th>
                 <th>Status</th>
@@ -218,10 +219,10 @@
               </tr>
               </thead>
               <tbody>
-                {% for projects in latest_tasks %}
+                {% for projects in projects_near_due_date %}
               <tr>
-                <td><a href="./pages/examples/project-detail.html">{{projects.name}}</a></td>
-                <td>{{projects.start_date}}</td>
+                <td><a href="{% url "projects:project-detail" projects.id %}">{{projects.name}}</a></td>
+                <td>{{projects.team.name}}</td>
                 <td>{{projects.due_date}}</td>
                 <td>{{projects.days_until_due}}</td>
                 <td>{{projects.status}}</td>
@@ -237,7 +238,7 @@
         <!-- /.card-body -->
         <div class="card-footer clearfix">
          
-          <a href="./pages/examples/projects.html" class="btn btn-sm btn-secondary float-right">View All Projects</a>
+          <a href="{% url "projects:due-list" %}" class="btn btn-sm btn-secondary float-right">View All Projects</a>
         </div>
         <!-- /.card-footer -->
       </div>
@@ -251,12 +252,12 @@
               </p>
 
 
-              {% for tasks in latest_tasks %}
+              {% for projects in projects_near_due_date %}
               <div class="progress-group">
-                {{tasks.name}}
-                <span class="float-right"><b>{{ tasks.progress }}</b>/100</span>
+                {{projects.name}}
+                <span class="float-right"><b>{{ projects.progress }}</b>/100</span>
                 <div class="progress progress-sm">
-                  <div class="progress-bar bg-{{tasks.status_color}}" style="width: {{ tasks.progress}}%"></div>
+                  <div class="progress-bar bg-{{projects.status_color}}" style="width: {{ projects.progress}}%"></div>
                 </div>
               </div>
               {% endfor %}
@@ -321,7 +322,7 @@
             </div>
             <!-- /.card-body -->
             <div class="card-footer text-center">
-              <a href="./pages/examples/teams.html">View All Users</a>
+              <a href="{% url "accounts:members-list" %}">View All Users</a>
             </div>
             <!-- /.card-footer -->
           </div>
@@ -374,6 +375,11 @@
               <!--/.direct-chat-messages-->
             </div>
             <!-- /.card-body -->
+
+             <!-- /.card-body -->
+             <div class="card-footer text-center">
+              <a href="{% url "notifications:notification-list" %}">See All Notifications</a>
+            </div>
             
             <!-- /.card-footer-->
           </div>

@@ -22,7 +22,13 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('accounts.urls'),)
+    path('', include('accounts.urls', namespace='accounts')),
+    path('projects/', include('projects.urls', namespace='projects')),
+    path('notifications/', include('notifications.urls', namespace='notifications')),
+    path('tasks/', include('tasks.urls', namespace='tasks')),
+    
+    #authentication
+    path('accounts/', include('django.contrib.auth.urls')),
 ]
 
 if settings.DEBUG:
