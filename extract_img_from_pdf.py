@@ -1,7 +1,7 @@
 import fitz  # PyMuPDF
 import os
 
-pdf_path = "C:/Users/Raiyan/Downloads/VEGA Cold Chain Compliance Stack-1-20.pdf"
+pdf_path = ""
 output_dir =  "extracted_images"
 
 os.makedirs(output_dir, exist_ok=True)
@@ -25,4 +25,5 @@ for page_index in range(len(doc)):
         with open(os.path.join(output_dir, image_filename), "wb") as f:
             f.write(image_bytes)
             
+
 print(f"✅ Extracted {img_count} images successfully!")
